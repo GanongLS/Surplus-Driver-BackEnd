@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const adminController = require('../controllers/adminController');
-const authenticateAdmin = require('../middlewares/adminAuthMiddleware');
+const adminController = require("../controllers/adminController");
+const authenticateAdmin = require("../middlewares/adminAuthMiddleware");
 
 /**
  * @swagger
@@ -43,7 +43,7 @@ const authenticateAdmin = require('../middlewares/adminAuthMiddleware');
  *                 token:
  *                   type: string
  */
-router.post('/auth/login', adminController.login);
+router.post("/auth/login", adminController.login);
 
 // ALL ROUTES BELOW REQUIRE ADMIN TOKEN
 router.use(authenticateAdmin);
@@ -60,7 +60,7 @@ router.use(authenticateAdmin);
  *       200:
  *         description: List of drivers
  */
-router.get('/drivers', adminController.getAllDrivers);
+router.get("/drivers", adminController.getAllDrivers);
 
 /**
  * @swagger
@@ -86,7 +86,7 @@ router.get('/drivers', adminController.getAllDrivers);
  *       201:
  *         description: Driver created
  */
-router.post('/drivers', adminController.createDriver);
+router.post("/drivers", adminController.createDriver);
 
 /**
  * @swagger
@@ -113,7 +113,7 @@ router.post('/drivers', adminController.createDriver);
  *       200:
  *         description: Driver updated
  */
-router.put('/drivers/:id', adminController.updateDriverStatus);
+router.put("/drivers/:id", adminController.updateDriverStatus);
 
 /**
  * @swagger
@@ -127,7 +127,7 @@ router.put('/drivers/:id', adminController.updateDriverStatus);
  *       200:
  *         description: List of all orders
  */
-router.get('/orders', adminController.getAllOrders);
+router.get("/orders", adminController.getAllOrders);
 
 /**
  * @swagger
@@ -147,6 +147,37 @@ router.get('/orders', adminController.getAllOrders);
  *       201:
  *         description: Order created
  */
-router.post('/orders', adminController.createOrder);
+router.post("/orders", adminController.createOrder);
+
+/**
+ * @swagger
+ * /admin/orders/{id}:
+ *   put:
+ *     summary: Update order details or status
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               customer_name: { type: string }
+ *               customer_address: { type: string }
+ *               juice_type: { type: string }
+ *               quantity: { type: integer }
+ *               status: { type: string }
+ *     responses:
+ *       200:
+ *         description: Order updated
+ */
+router.put("/orders/:id", adminController.updateOrder);
 
 module.exports = router;

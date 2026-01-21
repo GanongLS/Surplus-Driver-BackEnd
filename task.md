@@ -205,4 +205,17 @@ buatkan dokumentasi API menggunakan Swagger
 
 ---
 
+## 14. Buatkan setting docker compose untuk produksi
+
+buat docker-compose.prod.yaml untuk produksi dengan setting port dan environment variable sesuai dengan produksi sebagai berikut:
+
+port aplikasi menjadi berjalan di localhost:3070
+port posgrestsql menjadi berjalan di localhost:5433
+---
+
+## 14. Buatkan Front End dalam folder baru ./front-end
+
+buatkan front end web service untuk admin menggunakan ReactJS. jalankan dalam docker compose yang sama. 
+---
+
 **End of task.md**
