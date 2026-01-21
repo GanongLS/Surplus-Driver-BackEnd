@@ -1,85 +1,111 @@
-# Surplus Backend Service
+# Surplus Backend & Admin Dashboard
 
-Backend service ini dibangun untuk memfasilitasi operasional **Surplus Driver App** (aplikasi internal untuk pengemudi) serta menyediakan layanan data untuk **Admin Dashboard** (Web Service). Aplikasi ini dibangun dengan prinsip *API-first* dan dijalankan sepenuhnya menggunakan containerisasi Docker.
+Solusi backend lengkap untuk **Surplus Driver App** dan **Admin Dashboard API**. Proyek ini menggunakan arsitektur _containerized_ dengan Docker untuk konsistensi lingkungan development dan production.
 
-## 🚀 Fitur Utama
+## 🛠️ Tech Stack
 
-Backend ini telah mengimplementasikan modul-modul berikut:
-
-### 1. Driver Module (Mobile App Support)
-- **Autentikasi**: Login aman menggunakan JWT untuk driver.
-- **Manajemen Order**: 
-  - Melihat daftar order yang tersedia (Status: MENUNGGU).
-  - Melihat order aktif driver.
-  - Menerima order (Accept Order).
-  - Update status order (`DITERIMA` -> `DALAM_PERJALANAN` -> `SELESAI`).
-- **History**: Melihat riwayat order yang telah diselesaikan.
-
-### 2. Admin Module (Web Dashboard Support)
-- **Autentikasi Admin**: Endpoint login khusus admin dengan proteksi middleware terpisah.
-- **Manajemen Driver**: 
-  - Admin dapat mendaftarkan driver baru.
-  - Melihat daftar seluruh driver.
-  - Menonaktifkan/Mengaktifkan status driver.
-- **Manajemen Order**:
-  - Admin dapat membuat order baru (simulasi incoming order).
-  - Melihat seluruh daftar order yang masuk.
-
-### 3. API Documentation
-- Terintegrasi dengan **Swagger UI** untuk dokumentasi API yang interaktif dan mudah diuji.
+- **Backend**: Node.js (Express), PostgreSQL
+- **Frontend**: React (Vite), Glassmorphism UI
+- **Infrastructure**: Docker, Docker Compose, Nginx (Production)
 
 ---
 
-## 🛠️ Cara Menjalankan Aplikasi
+## 🚀 Panduan Cepat (Quick Start)
 
-Prasyarat: Pastikan **Docker** dan **Docker Compose** sudah terinstall di komputer Anda.
+Prasyarat: Pastikan **Docker** dan **Docker Compose** sudah terinstall.
 
-1. **Jalankan Service**
-   Gunakan perintah berikut untuk membangun dan menjalankan seluruh service (Node.js App + PostgreSQL Database):
-   ```bash
-   docker compose up --build
-   ```
-   *Tunggu hingga server berjalan di port 3000.*
+### 1. Lingkungan Development
 
-2. **Setup Database Awal (Migrasi & Seeding)**
-   Jalankan perintah berikut pada terminal terpisah (pastikan container sedang berjalan) untuk menyiapkan tabel admin dan user test:
+Gunakan mode ini untuk pengembangan. Fitur _hot-reload_ aktif untuk Backend dan Frontend.
 
-   ```bash
-   # Update password user test (Driver)
-   docker compose exec app node update_password.js
-   
-   # Setup tabel Admin & akun Admin default
-   docker compose exec app node migrate_admin.js
-   ```
+```bash
+# 1. Buat file .env dari contoh
+cp .env.example .env
 
-3. **Akses Dokumentasi API**
-   Buka browser dan kunjungi:
-   👉 **http://localhost:3000/api-docs**
+# 2. Jalankan Container (Backend + Frontend + DB)
+docker compose up -d --build
+```
 
-   Anda bisa mencoba seluruh endpoint langsung dari halaman Swagger ini.
+**Akses Aplikasi:**
+
+- **Frontend Dashboard**: [http://localhost:5173](http://localhost:5173)
+- **Backend API**: [http://localhost:3070](http://localhost:3070)
+- **API Docs (Swagger)**: [http://localhost:3070/api-docs](http://localhost:3070/api-docs)
+- **Database**: Port 5433
+
+### 2. Lingkungan Production
+
+Gunakan mode ini untuk deployment. Frontend akan di-build statis dan disajikan via Nginx.
+
+```bash
+# 1. Jalankan dengan konfigurasi production
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+**Akses Aplikasi:**
+
+- **Frontend Dashboard**: [http://localhost:8070](http://localhost:8070) (atau port 80 jika di server)
+- **Backend API**: [http://localhost:3070](http://localhost:3070)
+
+---
+
+## 📦 Konfigurasi & Migrasi
+
+### Setup Database Otomatis
+
+Saat pertama kali dijalankan, sistem akan otomatis:
+
+1. Membuat tabel `drivers`, `orders`, `admins`, dan `products`.
+2. Melakukan _seeding_ data awal (akun admin, driver test, daftar produk jus).
+
+Jika Anda perlu mereset atau mengisi ulang data secara manual:
+
+```bash
+# Masuk ke container backend
+docker compose exec app sh
+
+# Jalankan script seeding (opsional)
+node src/utils/seedAdmin.js       # Reset Admin
+node src/utils/createProductsTable.js # Reset Products
+```
+
+### Environment Variables (.env)
+
+Pastikan file `.env` memiliki konfigurasi berikut (sesuaikan jika perlu):
+
+```env
+PORT=3070
+DB_USER=surplus_user
+DB_HOST=db
+DB_NAME=surplus_db
+DB_PASSWORD=surplus_password
+DB_PORT=5433
+JWT_SECRET=rahasia_negara_surplus_2024
+```
 
 ---
 
 ## 🧪 Akun Demo
 
-Untuk pengujian, gunakan kredensial berikut:
+Gunakan kredensial ini untuk masuk ke dashboard atau aplikasi driver:
 
-- **Driver**:
-  - Email/Phone: `budi@example.com` / `081234567890`
-  - Password: `password123`
-
-- **Admin**:
-  - Username: `admin`
-  - Password: `adminpassword123`
+| Role       | Username / Email   | Password      |
+| ---------- | ------------------ | ------------- |
+| **Admin**  | `admin`            | `password123` |
+| **Driver** | `budi@example.com` | `password123` |
 
 ---
 
-## 🔮 Langkah Berikutnya (Upgrades)
+## 🔮 Fitur Utama
 
-Untuk pengembangan selanjutnya agar sistem ini siap production (Production Ready), beberapa hal berikut perlu ditingkatkan:
+### Dashboard Admin
 
-1.  **Realtime Updates**: Mengimplementasikan **WebSocket (Socket.io)** atau **Firebase** agar Driver tidak perlu refresh manual untuk melihat order baru, dan Admin bisa memantau posisi driver secara live.
-2.  **Validasi Lanjutan**: Menambahkan library validasi data yang lebih ketat (seperti Joi atau Zod) untuk setiap input request.
-3.  **Unit & Integration Testing**: Menambahkan framework testing (Jest/Supertest) untuk menjamin stabilitas kode sebelum deploy.
-4.  **Error Handling**: Memperbaiki format respons error agar lebih standar dan informatif dan sentralisasi logging.
-5.  **Security Hardening**: Rate limiting, Helmet config adjustments, dan environment variable validation.
+- **Monitoring Order**: Filter order Aktif vs Selesai otomatis.
+- **Product Management**: Tambah/Hapus jenis jus, atur ketersediaan stok (Available/Unavailable).
+- **Order Processing**: Terima order -> Kirim -> Selesaikan.
+- **Order History**: Arsip order yang sudah selesai.
+
+### Driver API
+
+- Autentikasi JWT Aman.
+- Update status order realtime.
