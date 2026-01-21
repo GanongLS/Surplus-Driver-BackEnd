@@ -180,4 +180,60 @@ router.post("/orders", adminController.createOrder);
  */
 router.put("/orders/:id", adminController.updateOrder);
 
+/**
+ * @swagger
+ * /admin/products:
+ *   get:
+ *     summary: Get all products (optionally filter by availability)
+ *     tags: [Admin]
+ *     parameters:
+ *       - in: query
+ *         name: available
+ *         schema: { type: boolean }
+ *     responses:
+ *       200:
+ *         description: List of products
+ */
+router.get("/products", adminController.getProducts);
+
+/**
+ * @swagger
+ * /admin/products:
+ *   post:
+ *     summary: Create new product
+ *     tags: [Admin]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string }
+ *     responses:
+ *       201: { description: Product created }
+ */
+router.post("/products", adminController.createProduct);
+
+/**
+ * @swagger
+ * /admin/products/{id}:
+ *   put:
+ *     summary: Toggle product availability
+ *     tags: [Admin]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               is_available: { type: boolean }
+ *     responses:
+ *       200: { description: Product updated }
+ */
+router.put("/products/:id", adminController.toggleProductStatus);
+
 module.exports = router;

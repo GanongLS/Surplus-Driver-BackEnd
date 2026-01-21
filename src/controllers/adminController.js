@@ -73,8 +73,28 @@ const updateDriverStatus = async (req, res) => {
 
 // Order Management
 const getAllOrders = async (req, res) => {
+	const { active, status } = req.query;
 	try {
-		const result = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
+		let query = "SELECT * FROM orders";
+		const params = [];
+		const conditions = [];
+
+		if (active === "true") {
+			conditions.push(`status != 'SELESAI'`);
+		}
+
+		if (status) {
+			conditions.push(`status = $${params.length + 1}`);
+			params.push(status);
+		}
+
+		if (conditions.length > 0) {
+			query += " WHERE " + conditions.join(" AND ");
+		}
+
+		query += " ORDER BY created_at DESC";
+
+		const result = await pool.query(query, params);
 		res.json(result.rows);
 	} catch (error) {
 		console.error(error);
@@ -153,6 +173,53 @@ const updateOrder = async (req, res) => {
 	}
 };
 
+const getProducts = async (req, res) => {
+	const { available } = req.query;
+	try {
+		let query = "SELECT * FROM products";
+		const params = [];
+		if (available === "true") {
+			query += " WHERE is_available = true";
+		}
+		query += " ORDER BY name ASC";
+		const result = await pool.query(query, params);
+		res.json(result.rows);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Server error" });
+	}
+};
+
+const createProduct = async (req, res) => {
+	const { name } = req.body;
+	try {
+		const result = await pool.query("INSERT INTO products (name) VALUES ($1) RETURNING *", [name]);
+		res.status(201).json(result.rows[0]);
+	} catch (error) {
+		if (error.code === "23505") {
+			return res.status(409).json({ message: "Product already exists" });
+		}
+		console.error(error);
+		res.status(500).json({ message: "Server error" });
+	}
+};
+
+const toggleProductStatus = async (req, res) => {
+	const { id } = req.params;
+	const { is_available } = req.body;
+	try {
+		const result = await pool.query(
+			"UPDATE products SET is_available = $1 WHERE id = $2 RETURNING *",
+			[is_available, id],
+		);
+		if (result.rows.length === 0) return res.status(404).json({ message: "Product not found" });
+		res.json(result.rows[0]);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Server error" });
+	}
+};
+
 module.exports = {
 	login,
 	getAllDrivers,
@@ -161,4 +228,7 @@ module.exports = {
 	getAllOrders,
 	createOrder,
 	updateOrder,
+	getProducts,
+	createProduct,
+	toggleProductStatus,
 };

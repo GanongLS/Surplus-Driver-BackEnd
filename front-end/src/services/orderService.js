@@ -12,8 +12,8 @@ axios.interceptors.request.use(config => {
 	return config;
 });
 
-const getOrders = async () => {
-	const response = await axios.get(`${API_URL}/admin/orders`);
+const getOrders = async (params = {}) => {
+	const response = await axios.get(`${API_URL}/admin/orders`, { params });
 	return response.data;
 };
 

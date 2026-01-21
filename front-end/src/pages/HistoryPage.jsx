@@ -13,10 +13,8 @@ const HistoryPage = () => {
 
 	const fetchOrders = async () => {
 		try {
-			const data = await orderService.getOrders();
-			// Filter for 'SELESAI' status
-			const completedOrders = data.filter(order => order.status === "SELESAI");
-			setOrders(completedOrders);
+			const data = await orderService.getOrders({ status: "SELESAI" });
+			setOrders(data);
 		} catch (err) {
 			console.error("Failed to fetch orders", err);
 		} finally {

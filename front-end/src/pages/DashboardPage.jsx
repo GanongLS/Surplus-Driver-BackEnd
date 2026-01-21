@@ -2,34 +2,81 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import orderService from "../services/orderService";
 import authService from "../services/authService";
+import productService from "../services/productService";
 
 const DashboardPage = () => {
 	const [orders, setOrders] = useState([]);
 	const [loading, setLoading] = useState(true);
+
+	// Order Modal State
 	const [showModal, setShowModal] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [selectedOrder, setSelectedOrder] = useState(null);
 	const [formData, setFormData] = useState({
 		customer_name: "",
 		customer_address: "",
-		juice_type: "Orange Juice",
+		juice_type: "",
 		quantity: 1,
 		latitude: "",
 		longitude: "",
 	});
 
+	// Product Management State
+	const [products, setProducts] = useState([]); // All products (for management)
+	const [availableProducts, setAvailableProducts] = useState([]); // Only available (for dropdown)
+	const [showProductModal, setShowProductModal] = useState(false);
+	const [newProductName, setNewProductName] = useState("");
+
 	useEffect(() => {
 		fetchOrders();
+		fetchProducts();
 	}, []);
 
 	const fetchOrders = async () => {
 		try {
-			const data = await orderService.getOrders();
+			const data = await orderService.getOrders({ active: true });
 			setOrders(data);
 		} catch (err) {
 			console.error("Failed to fetch orders", err);
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const fetchProducts = async () => {
+		try {
+			const allData = await productService.getProducts(false);
+			const availableData = await productService.getProducts(true);
+			setProducts(allData);
+			setAvailableProducts(availableData);
+
+			// Set default juice type if empty and available products exist
+			if (availableData.length > 0 && formData.juice_type === "") {
+				setFormData(prev => ({ ...prev, juice_type: availableData[0].name }));
+			}
+		} catch (err) {
+			console.error("Failed to fetch products", err);
+		}
+	};
+
+	const handleAddProduct = async e => {
+		e.preventDefault();
+		if (!newProductName.trim()) return;
+		try {
+			await productService.createProduct(newProductName);
+			setNewProductName("");
+			fetchProducts();
+		} catch (err) {
+			alert(err.response?.data?.message || "Failed to add product");
+		}
+	};
+
+	const handleToggleProduct = async product => {
+		try {
+			await productService.toggleProductStatus(product.id, !product.is_available);
+			fetchProducts();
+		} catch (err) {
+			alert("Failed to update product status");
 		}
 	};
 
@@ -67,7 +114,7 @@ const DashboardPage = () => {
 		setFormData({
 			customer_name: "",
 			customer_address: "",
-			juice_type: "Orange Juice",
+			juice_type: "Alpukat",
 			quantity: 1,
 			latitude: "",
 			longitude: "",
@@ -132,12 +179,6 @@ const DashboardPage = () => {
 				}}>
 				<h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>Dashboard</h1>
 				<div style={{ display: "flex", gap: "1rem" }}>
-					<button
-						onClick={openCreateModal}
-						className="btn btn-primary"
-						style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-						+ New Order
-					</button>
 					<Link
 						to="/history"
 						className="btn"
@@ -281,6 +322,27 @@ const DashboardPage = () => {
 				)}
 			</div>
 
+			<div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "2rem" }}>
+				<button
+					onClick={() => setShowProductModal(true)}
+					className="btn"
+					style={{
+						background: "rgba(255,255,255,0.1)",
+						color: "white",
+						display: "flex",
+						alignItems: "center",
+						gap: "0.5rem",
+					}}>
+					Product List
+				</button>
+				<button
+					onClick={openCreateModal}
+					className="btn btn-primary"
+					style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+					+ New Order
+				</button>
+			</div>
+
 			{showModal && (
 				<div
 					style={{
@@ -342,10 +404,11 @@ const DashboardPage = () => {
 										value={formData.juice_type}
 										onChange={e => setFormData({ ...formData, juice_type: e.target.value })}
 										style={{ background: "#0f172a", color: "white" }}>
-										<option value="Orange Juice">Orange Juice</option>
-										<option value="Apple Juice">Apple Juice</option>
-										<option value="Mango Juice">Mango Juice</option>
-										<option value="Guava Juice">Guava Juice</option>
+										{availableProducts.map(product => (
+											<option key={product.id} value={product.name}>
+												{product.name}
+											</option>
+										))}
 									</select>
 								</div>
 								<div style={{ marginBottom: "1rem", width: "100px" }}>
@@ -375,6 +438,116 @@ const DashboardPage = () => {
 								</button>
 							</div>
 						</form>
+					</div>
+				</div>
+			)}
+
+			{showProductModal && (
+				<div
+					style={{
+						position: "fixed",
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						background: "rgba(0,0,0,0.8)",
+						display: "flex",
+						justifyContent: "center",
+						alignItems: "center",
+						zIndex: 1000,
+						backdropFilter: "blur(5px)",
+					}}>
+					<div
+						className="glass-panel"
+						style={{
+							padding: "2rem",
+							borderRadius: "1rem",
+							width: "100%",
+							maxWidth: "600px",
+							maxHeight: "80vh",
+							display: "flex",
+							flexDirection: "column",
+							background: "#1e293b",
+							color: "white",
+						}}>
+						<div
+							style={{
+								display: "flex",
+								justifyContent: "space-between",
+								alignItems: "center",
+								marginBottom: "1.5rem",
+							}}>
+							<h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Manage Products</h2>
+							<button
+								onClick={() => setShowProductModal(false)}
+								style={{
+									background: "none",
+									border: "none",
+									color: "white",
+									fontSize: "1.5rem",
+									cursor: "pointer",
+								}}>
+								&times;
+							</button>
+						</div>
+
+						<form
+							onSubmit={handleAddProduct}
+							style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+							<input
+								type="text"
+								className="input-field"
+								placeholder="New Product Name"
+								value={newProductName}
+								required
+								onChange={e => setNewProductName(e.target.value)}
+								style={{ flex: 1 }}
+							/>
+							<button type="submit" className="btn btn-primary">
+								Add
+							</button>
+						</form>
+
+						<div style={{ overflowY: "auto", flex: 1, paddingRight: "0.5rem" }}>
+							<table style={{ width: "100%", borderCollapse: "collapse" }}>
+								<thead>
+									<tr
+										style={{
+											borderBottom: "1px solid var(--glass-border)",
+											color: "var(--text-dim)",
+											textAlign: "left",
+										}}>
+										<th style={{ padding: "0.75rem" }}>Product Name</th>
+										<th style={{ padding: "0.75rem", textAlign: "right" }}>Availability</th>
+									</tr>
+								</thead>
+								<tbody>
+									{products.map(product => (
+										<tr
+											key={product.id}
+											style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+											<td style={{ padding: "0.75rem" }}>{product.name}</td>
+											<td style={{ padding: "0.75rem", textAlign: "right" }}>
+												<button
+													className="btn"
+													onClick={() => handleToggleProduct(product)}
+													style={{
+														fontSize: "0.75rem",
+														padding: "0.25rem 0.75rem",
+														background: product.is_available
+															? "var(--success)"
+															: "rgba(255,255,255,0.1)",
+														color: "white",
+														opacity: product.is_available ? 1 : 0.5,
+													}}>
+													{product.is_available ? "Available" : "Unavailable"}
+												</button>
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
 			)}
