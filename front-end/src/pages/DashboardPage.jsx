@@ -180,6 +180,18 @@ const DashboardPage = () => {
 				<h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>Dashboard</h1>
 				<div style={{ display: "flex", gap: "1rem" }}>
 					<Link
+						to="/drivers"
+						className="btn"
+						style={{
+							background: "rgba(255,255,255,0.05)",
+							color: "white",
+							textDecoration: "none",
+							display: "flex",
+							alignItems: "center",
+						}}>
+						Drivers
+					</Link>
+					<Link
 						to="/history"
 						className="btn"
 						style={{

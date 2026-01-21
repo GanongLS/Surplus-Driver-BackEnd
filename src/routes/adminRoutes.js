@@ -16,6 +16,7 @@ const authenticateAdmin = require("../middlewares/adminAuthMiddleware");
  *   post:
  *     summary: Admin Login
  *     tags: [Admin]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -195,6 +196,8 @@ router.put("/orders/:id", adminController.updateOrder);
  *   get:
  *     summary: Get all products (optionally filter by availability)
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: available
@@ -211,6 +214,8 @@ router.get("/products", adminController.getProducts);
  *   post:
  *     summary: Create new product
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       content:
  *         application/json:
@@ -229,6 +234,8 @@ router.post("/products", adminController.createProduct);
  *   put:
  *     summary: Toggle product availability
  *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
