@@ -123,6 +123,15 @@ router.put("/drivers/:id", adminController.updateDriverStatus);
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: active
+ *         schema: { type: boolean }
+ *         description: If true, excludes 'SELESAI' orders
+ *       - in: query
+ *         name: status
+ *         schema: { type: string, enum: [MENUNGGU, DITERIMA, DALAM_PERJALANAN, SELESAI] }
+ *         description: Filter by specific status
  *     responses:
  *       200:
  *         description: List of all orders
