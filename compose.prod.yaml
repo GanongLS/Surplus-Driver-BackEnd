@@ -1,9 +1,22 @@
 services:
-  app:
-    build: .
+  caddy:
+    image: caddy:alpine
     restart: always
     ports:
       - "3070:3070"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+      - frontend
+
+  app:
+    build: .
+    restart: always
+    expose:
+      - "3000"
     depends_on:
       - db
     env_file:
@@ -11,6 +24,7 @@ services:
     environment:
       - NODE_ENV=production
       - DB_PORT=5432
+      - PORT=3000
     command: npm start
 
   db:
@@ -31,10 +45,12 @@ services:
       context: ./front-end
       dockerfile: Dockerfile.prod
     restart: always
-    ports:
-      - "8070:80"
+    expose:
+      - "80"
     depends_on:
       - app
 
 volumes:
   pgdata:
+  caddy_data:
+  caddy_config:
