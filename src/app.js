@@ -13,10 +13,20 @@ app.use(
 		contentSecurityPolicy: {
 			directives: {
 				defaultSrc: ["'self'"],
-				scriptSrc: ["'self'", "'unsafe-inline'", "https://static.cloudflareinsights.com"],
+				scriptSrc: [
+					"'self'",
+					"'unsafe-inline'",
+					"https://static.cloudflareinsights.com",
+					"https://surplus.ganin.qzz.io",
+				],
 				styleSrc: ["'self'", "'unsafe-inline'"],
 				imgSrc: ["'self'", "data:", "https:"],
-				connectSrc: ["'self'", "https://static.cloudflareinsights.com"], // Allow Cloudflare beacon if needed
+				connectSrc: [
+					"'self'",
+					"https://static.cloudflareinsights.com",
+					"https://surplus.ganin.qzz.io",
+					"http://localhost:3070",
+				],
 			},
 		},
 	}),

@@ -10,8 +10,16 @@ const options = {
 		},
 		servers: [
 			{
+				url: "https://surplus.ganin.qzz.io/api/v1",
+				description: "Production Server",
+			},
+			{
+				url: "http://localhost:3070/api/v1",
+				description: "Local Development",
+			},
+			{
 				url: "/api/v1",
-				description: "Backend Service (Relative)",
+				description: "Relative Path (Fallback)",
 			},
 		],
 		components: {
