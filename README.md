@@ -113,3 +113,27 @@ Gunakan kredensial ini untuk masuk ke dashboard atau aplikasi driver:
 
 - Autentikasi JWT Aman.
 - Update status order realtime.
+
+---
+
+## 🔧 Troubleshooting Production
+
+### Swagger 404 (Not Found)
+
+Jika akses `/api-docs` mengembalikan 404:
+
+1.  **Cek Caddyfile**: Pastikan konfigurasi Caddyfile di server sudah memuat rule `/api-docs*`.
+2.  **Restart Caddy**: Jalankan ulang container Caddy untuk memuat konfigurasi baru.
+    ```bash
+    docker compose -f compose.prod.yaml up -d --build --force-recreate caddy
+    ```
+
+### CSP / Network Error
+
+Jika mengalami error "Refused to connect" atau masalah loading script di Swagger/Frontend:
+
+1.  **Update App**: Pastikan kode terbaru (`src/app.js` dan `src/config/swagger.js`) sudah di-pull.
+2.  **Restart App**: Rebuild container aplikasi.
+    ```bash
+    docker compose -f compose.prod.yaml up -d --build app
+    ```
