@@ -1,7 +1,9 @@
 import axios from "axios";
 import authService from "./authService";
 
-const API_URL = "http://localhost:3070/api/v1";
+import { API_BASE_URL } from "../config/api";
+
+const API_URL = API_BASE_URL;
 
 // Add auth token to requests
 axios.interceptors.request.use(config => {
