@@ -3,6 +3,10 @@
 		reverse_proxy app:3000
 	}
 
+	handle /api-docs* {
+		reverse_proxy app:3000
+	}
+
 	handle /* {
 		reverse_proxy frontend:80
 	}

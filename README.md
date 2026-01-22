@@ -39,13 +39,17 @@ Gunakan mode ini untuk deployment. Frontend akan di-build statis dan disajikan v
 
 ```bash
 # 1. Jalankan dengan konfigurasi production
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f compose.prod.yaml up -d --build
 ```
 
 **Akses Aplikasi:**
 
-- **Frontend Dashboard**: [http://localhost:8070](http://localhost:8070) (atau port 80 jika di server)
-- **Backend API**: [http://localhost:3070](http://localhost:3070)
+- **Unified Access (Via Caddy Proxy)**: [http://localhost:3070](http://localhost:3070)
+  - **Frontend/Dashboard**: `http://localhost:3070/`
+  - **Backend API Base URL**: `http://localhost:3070/api/v1`
+    - _Contoh_: `http://localhost:3070/api/v1/health`
+    - _Contoh_: `http://localhost:3070/api/v1/auth/login`
+  - **Swagger Docs**: `http://localhost:3070/api-docs`
 
 ---
 
